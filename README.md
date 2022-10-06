@@ -197,3 +197,131 @@ _name : a private variable that stores the name of the token
 _symbol : aprivate variable that stores the symbol of the token
 _decimals : a private variable that stores the decimal in which this token will be in
 
+```solidity
+constructor(string memory name, string memory symbol) public {
+        _name = name;
+        _symbol = symbol;
+        _decimals = 18;
+    }
+```
+
+
+constructor is used for initializing variables like its sets the name of the token and symbol
+
+```solidity
+	 function getOwner() external override view returns (address) {
+        return owner();
+    }
+```
+
+Function getOwer():
+This function is external it overrides a function called getOwner in ownable. Sol its view function its reads from state and returns the address of the owner of the toke
+
+```solidity
+	 function name() public override view returns (string memory) {
+        return _name;
+    }
+```
+
+Function name():
+
+this function  is public it overrides a function in IBEP.sol called name its view function its reads from state and name returns the name of the token
+
+```solidity
+	function decimals() public override view returns (uint8) {
+        return _decimals;
+    }
+```
+
+Function decimals():
+
+This  function  is public it overrides a function in IBEP.sol called decimal its view function its reads from state and returns the number of decimals this token uses
+
+
+```solidity
+\  function symbol() public override view returns (string memory) {
+        return _symbol;
+    }
+```
+
+Function symbol():
+This  function  is publicit overrides a function in IBEP.sol called symbol its view function its reads from state and returns the symbol of the token
+
+
+```solidity
+  function totalSupply() public override view returns (uint256) {
+        return _totalSupply;
+    }
+```
+
+Function totalsupply():
+
+This  function  is public it overrides a function in IBEP.sol called  totalsupply and its view function its reads from state and returns the totalsupply of a the token
+
+
+```solidity
+  function balanceOf(address account) public override view returns (uint256) {
+        return _balances[account];
+    }
+```
+
+Function balanceOf():
+
+This function is called balanceof is takes in address account as a parameter its public , its overrides balanceOf in IBEP.sol and given the key which is the address it can query the balance of an address
+
+```solidity
+  function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal {
+        require(sender != address(0), 'BEP20: transfer from the zero address');
+        require(recipient != address(0), 'BEP20: transfer to the zero address');
+
+        _balances[sender] = _balances[sender].sub(amount, 'BEP20: transfer amount exceeds balance');
+        _balances[recipient] = _balances[recipient].add(amount);
+        emit Transfer(sender, recipient, amount);
+    }
+```
+
+Function _transfer():
+
+Function _transfer takes in address of the sender (the owner of the tokens) , the recipient of the tokens and the amount to send , its internal .  function _transfer requires that the sender is not address Zero , requires that the recipient is not address zero , so not to send tokens to a null address (an address without a private)   . subtracts the number of tokens to be sent from the sender and adds the amount to the recipient an emits an event called Transfer .
+
+
+```solidity
+   function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal {
+        require(owner != address(0), 'BEP20: approve from the zero address');
+        require(spender != address(0), 'BEP20: approve to the zero address');
+
+        _allowances[owner][spender] = amount;
+        emit Approval(owner, spender, amount);
+    }
+```
+
+Function _approve(): 
+
+Takes address owner, address spender and amount of tokens to be approved its internal  function _approve requires that the sender is not address Zero , requires that the recipient is not address zero , so not to send tokens to a null address (an address without a private) and updates the _allowances mapping and emit event Approval
+
+```solidity
+ function allowance(address owner, address spender) public override view returns (uint256) {
+        return _allowances[owner][spender];
+    }
+```
+
+Function allowance():
+Its a public function, overrides allowances in IBEP.sol, its a view function and returns bool if this spenders has been allowed or not. Takes address of spender and owner and given checks if the spender has allowed or not
+
+```solidity
+  function approve(address spender, uint256 amount) public override returns (bool) {
+        _approve(_msgSender(), spender, amount);
+        return true;
+    }
+```
+
+Function approve():
+It is a public function, overrides allowances in IBEP.sol, is a view function and returns a bool if these spenders have been allowed or not. Takes the address of the spender and the number of tokens that were allowed. its  called _approve and checks if a user has been approved it returns true else false
