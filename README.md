@@ -325,3 +325,89 @@ Its a public function, overrides allowances in IBEP.sol, its a view function and
 
 Function approve():
 It is a public function, overrides allowances in IBEP.sol, is a view function and returns a bool if these spenders have been allowed or not. Takes the address of the spender and the number of tokens that were allowed. its  called _approve and checks if a user has been approved it returns true else false
+
+```solidity
+	  function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public override returns (bool) {
+        _transfer(sender, recipient, amount);
+        _approve(
+            sender,
+            _msgSender(),
+            _allowances[sender][_msgSender()].sub(amount, 'BEP20: transfer amount exceeds allowance')
+        );
+        return true;
+    }
+```
+
+function transferFrom(): 
+
+this function is takes in address sender, address recipient,uint256 amount and is public its overrides a function is IBEP.sol and returns  bool . it calls _transfer() and inputs sender, recipient and amount and calls _approve() and checks if the recipient has been approved and check if the amount the recipient is inputing is the greater than or equal to the approved amount
+
+
+```solidity
+	  function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
+        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
+        return true;
+    }
+```
+
+function increaseAllowance():
+
+with this function the msg.sender who has approved a spender before can increase the amount . it takes in  address spender, uint256 addedValue , where the spender is the approved address and the addedValue is the amount to be added to the formal
+
+
+```solidity
+   function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
+        _approve(
+            _msgSender(),
+            spender,
+            _allowances[_msgSender()][spender].sub(subtractedValue, 'BEP20: decreased allowance below zero')
+        );
+        return true;
+    }
+```
+
+function decreaseAllowance():
+
+with this function the msg.sender who has approved a spender before can decrease the amount . it takes in  address spender, uint256 subtractedValue , where the spender is the approved address and the subtractedValue is the amount to be subtracted to the formal
+
+```solidity
+   function _mint(address account, uint256 amount) internal {
+        require(account != address(0), 'BEP20: mint to the zero address');
+
+        _totalSupply = _totalSupply.add(amount);
+        _balances[account] = _balances[account].add(amount);
+        emit Transfer(address(0), account, amount);
+    }
+```
+
+function _mint();
+
+The mint function , this where all the tokens are been generated.
+It takes in address account, uint256 amount it's internal (can only be called by this contract and other derived contracts) . its first checks that the account is not address zero(because if tokens are minted to this address "address zero" is cant be gotten again) , increases totalsupply , increase the account balance by calling _balances and lastly emit an event called Transfer().
+
+```solidity
+   function mint(uint256 amount) public onlyOwner returns (bool) {
+        _mint(_msgSender(), amount);
+        return true;
+    }
+```
+
+function mint():
+
+This function is public its called by only the owner of the contract and it accepts uint256 amount and returns bool . in the logic part it calls _mint() and mints tokens to the owner of the contract and returns true when its successful.
+
+```solidity
+   function _burn(address account, uint256 amount) internal {
+        require(account != address(0), 'BEP20: burn from the zero address');
+
+        _balances[account] = _balances[account].sub(amount, 'BEP20: burn amount exceeds balance');
+        _totalSupply = _totalSupply.sub(amount);
+        emit Transfer(account, address(0), amount);
+    }
+```
+
+
