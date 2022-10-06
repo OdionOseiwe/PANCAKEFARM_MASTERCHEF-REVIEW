@@ -267,7 +267,7 @@ This  function  is public it overrides a function in IBEP.sol called  totalsuppl
 
 Function balanceOf():
 
-This function is called balanceof is takes in address account as a parameter its public , its overrides balanceOf in IBEP.sol and given the key which is the address it can query the balance of an address
+This function is called balanceof is takes in address account as a parameter its public, its overrides balanceOf in IBEP.sol and given the key which is the address it can query the balance of an address
 
 ```solidity
   function _transfer(
@@ -344,7 +344,7 @@ It is a public function, overrides allowances in IBEP.sol, is a view function an
 
 function transferFrom(): 
 
-this function is takes in address sender, address recipient,uint256 amount and is public its overrides a function is IBEP.sol and returns  bool . it calls _transfer() and inputs sender, recipient and amount and calls _approve() and checks if the recipient has been approved and check if the amount the recipient is inputing is the greater than or equal to the approved amount
+This function takes in address sender, address recipient,uint256 amount and is public its overrides a function is IBEP.sol and returns  bool . it calls _transfer() and inputs sender, recipient and amount and calls _approve() and checks if the recipient has been approved and checks if the amount the recipient is inputing is greater than or equal to the approved amount
 
 
 ```solidity
@@ -356,7 +356,7 @@ this function is takes in address sender, address recipient,uint256 amount and i
 
 function increaseAllowance():
 
-with this function the msg.sender who has approved a spender before can increase the amount . it takes in  address spender, uint256 addedValue , where the spender is the approved address and the addedValue is the amount to be added to the formal
+With this function the msg.sender who has approved a spender before can increase the amount . it takes in the address spender, uint256 addedValue , where the spender is the approved address and the addedValue is the amount to be added to the formal
 
 
 ```solidity
@@ -372,7 +372,7 @@ with this function the msg.sender who has approved a spender before can increase
 
 function decreaseAllowance():
 
-with this function the msg.sender who has approved a spender before can decrease the amount . it takes in  address spender, uint256 subtractedValue , where the spender is the approved address and the subtractedValue is the amount to be subtracted to the formal
+With this function the msg.sender who has approved a spender before can decrease the amount. it takes in yhe address spender, uint256 subtractedValue , where the spender is the approved address and the subtractedValue is the amount to be subtracted to the formal
 
 ```solidity
    function _mint(address account, uint256 amount) internal {
@@ -386,8 +386,8 @@ with this function the msg.sender who has approved a spender before can decrease
 
 function _mint();
 
-The mint function , this where all the tokens are been generated.
-It takes in address account, uint256 amount it's internal (can only be called by this contract and other derived contracts) . its first checks that the account is not address zero(because if tokens are minted to this address "address zero" is cant be gotten again) , increases totalsupply , increase the account balance by calling _balances and lastly emit an event called Transfer().
+The mint function, this where all the tokens are been generated.
+It takes in address account, uint256 amount it's internal (can only be called by this contract and other derived contracts) . its first checks that the account is not address zero(because if tokens are minted to this address "address zero" is cant be gotten again), increases total supply, increases the account balance by calling _balances and lastly emits an event called Transfer().
 
 ```solidity
    function mint(uint256 amount) public onlyOwner returns (bool) {
@@ -398,7 +398,7 @@ It takes in address account, uint256 amount it's internal (can only be called by
 
 function mint():
 
-This function is public its called by only the owner of the contract and it accepts uint256 amount and returns bool . in the logic part it calls _mint() and mints tokens to the owner of the contract and returns true when its successful.
+This function is public its called by only the owner of the contract and it accepts the uint256 amount and returns a bool. In the logic part, it calls _mint() and mints tokens to the owner of the contract and returns true when it's successful.
 
 ```solidity
    function _burn(address account, uint256 amount) internal {
@@ -410,4 +410,101 @@ This function is public its called by only the owner of the contract and it acce
     }
 ```
 
-`
+function _burn():
+
+where the burning of tokens occurs, with this function you can deduce the total circulating supply of tokens, it takes in two parameters address account, uint256 amount and its visibility is internal, where the account is the address of the person that wants to burn the token and the amount is the number of tokens the person wants to burn . it requires that account that wants to burn the tokens is not address zero , removes the amount from the account address and deduces total supply and emits a Transfer event.
+
+```solidity
+	function _burnFrom(address account, uint256 amount) internal {
+        _burn(account, amount);
+        _approve(
+            account,
+            _msgSender(),
+            _allowances[account][_msgSender()].sub(amount, 'BEP20: burn amount exceeds allowance')
+        );
+    }
+```
+
+Destroys amount tokens from account, amount is then deducted from the caller's allowance 
+
+
+
+### OWNABLE.SOL
+
+```solidity
+import '@pancakeswap/pancake-swap-lib/contracts/access/Ownable.sol';
+```
+
+This contract imports Context.sol and inheritances it
+```solidity
+import '../GSN/Context.sol';
+```
+
+```solidity
+    address private _owner;
+```
+
+Owner a state variable and holds the owner of the contract and its private
+
+```solidity
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+```
+    
+	event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+An event called OwnershipTransferred() takes address previousOwner and address newOwner its emitted when the ownership of a contract is being transferred .
+
+```solidity
+	constructor() internal {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
+```
+Initializes the contract setting the deployer as the initial owner
+and emits OwnershipTransferred and here ownership is being transferred from address(0) to msg.sender.
+
+```solidity
+	 function owner() public view returns (address) {
+        return _owner;
+    }
+```
+Returns the address of the current owner.
+
+```solidity
+	    modifier onlyOwner() {
+        require(_owner == _msgSender(), 'Ownable: caller is not the owner');
+        _;
+    }
+```
+Throws if called by any account other than the owner.
+
+```solidity
+	function renounceOwnership() public onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
+```
+
+Leaves the contract without owner. It will not be possible to call
+onlyOwner functions anymore. Can only be called by the current owner. Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.
+
+
+```solidity
+	function transferOwnership(address newOwner) public onlyOwner {
+        _transferOwnership(newOwner);
+    }
+```
+
+Transfers ownership of the contract to a new account newOwner.
+Can only be called by the current owner.
+
+
+```solidity
+	function _transferOwnership(address newOwner) internal {
+        require(newOwner != address(0), 'Ownable: new owner is the zero address');
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+```
+
+this function is internal and takes in the address of the new owner and checks if not address(0) and first emits OwnershipTransferred() and updates the state.
