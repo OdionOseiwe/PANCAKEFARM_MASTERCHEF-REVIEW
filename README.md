@@ -26,7 +26,7 @@ Imported libraries
 	import '@pancakeswap/pancake-swap-lib/contracts/math/SafeMath.sol';
 ```
 
-SafeMath.sol:
+### SafeMath.sol:
  The SafeMath library validates if an arithmetic operation would result in an integer overflow/underflow. If it would, the library throws an exception, effectively reverting the transaction. All the functions in SafeMath are internal functions and returns a value.
 Its has functions that add , subtract , divide, multiply , modules, get the square root of a number 
 
@@ -133,7 +133,7 @@ Function sqrt(): this functions takes in uint256 y and  uint256 z , calculates t
 ```
 
 
-IBEP.SOL AND SAFEBEP.SOL:
+### IBEP.SOL AND SAFEBEP.SOL:
 
 
 ```solidity
@@ -410,4 +410,4 @@ This function is public its called by only the owner of the contract and it acce
     }
 ```
 
-
+`
