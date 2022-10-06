@@ -508,3 +508,13 @@ Can only be called by the current owner.
 ```
 
 this function is internal and takes in the address of the new owner and checks if not address(0) and first emits OwnershipTransferred() and updates the state.
+
+```solidity
+	import "./CakeToken.sol";
+	import "./SyrupBar.sol";
+```
+
+### CAKETOKEN.SOL
+### SYRUPBAR.SOL
+
+
