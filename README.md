@@ -516,5 +516,290 @@ this function is internal and takes in the address of the new owner and checks i
 
 ### CAKETOKEN.SOL
 ### SYRUPBAR.SOL
+__
+
+```solidity
+pragma solidity 0.6.12;
+
+```
+The pragma keyword is used to enable certain compiler features or checks in this contract and it uses version 0.6.12
 
 
+```solidity
+import "@pancakeswap/pancake-swap-lib/contracts/token/BEP20/BEP20.sol";
+
+```
+
+```solidity
+contract CakeToken is BEP20('PancakeSwap Token', 'Cake') 
+
+```
+
+Its contract inheritance's BEP20 and initialises the constructor with 'PancakeSwap Token' as the name and 'Cake' as the symbol'
+
+
+```solidity
+ function mint(address _to, uint256 _amount) public onlyOwner {
+        _mint(_to, _amount);
+        _moveDelegates(address(0), _delegates[_to], _amount);
+    }
+
+```
+
+With this function its mints some amount of tokens to the delegatee and and moves delegation address(0).
+
+```solidity
+mapping (address => address) internal _delegates;
+
+```
+
+saves to a mapping a record of each accounts delegate
+
+```solidity
+    struct Checkpoint {
+        uint32 fromBlock;
+        uint256 votes;
+    }
+```
+
+a struct that saves the block number and number of votes
+
+
+```solidity
+mapping (address => mapping (uint32 => Checkpoint)) public checkpoints;
+```
+
+maps address to index to struct
+
+```solidity
+mapping (address => uint32) public numCheckpoints;
+```
+
+this mapping address to number of votes
+
+
+```solidity
+bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
+```
+
+this is from EIP 712 the hash of a  unique string  
+
+```solidity
+bytes32 public constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+```
+
+this is from EIP 712 the hash of a  unique string  
+
+
+```solidity
+    mapping (address => uint) public nonces;
+```
+
+keeps track of an address to the number of times he delegates
+
+
+```solidity
+   event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);  
+```
+
+An event thats emitted when an account changes its delegate
+
+```solidity
+  event DelegateVotesChanged(address indexed delegate, uint previousBalance, uint newBalance);
+```
+
+An event thats emitted when a delegate account's vote balance changes
+
+
+```solidity
+  function delegates(address delegator)
+        external
+        view
+        returns (address)
+    {
+        return _delegates[delegator];
+    }
+```
+
+its returns the address of the delegatee that this address delegated
+
+```solidity
+   function delegate(address delegatee) external {
+        return _delegate(msg.sender, delegatee);
+    }
+```
+
+this function Delegate votes from msg.sender which is the delegator to `delegatee 
+
+```solidity
+   function delegateBySig(
+        address delegatee,
+        uint nonce,
+        uint expiry,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    )
+        external
+    {
+        bytes32 domainSeparator = keccak256(
+            abi.encode(
+                DOMAIN_TYPEHASH,
+                keccak256(bytes(name())),
+                getChainId(),
+                address(this)
+            )
+        );
+
+        bytes32 structHash = keccak256(
+            abi.encode(
+                DELEGATION_TYPEHASH,
+                delegatee,
+                nonce,
+                expiry
+            )
+        );
+
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                domainSeparator,
+                structHash
+            )
+        );
+
+        address signatory = ecrecover(digest, v, r, s);
+        require(signatory != address(0), "CAKE::delegateBySig: invalid signature");
+        require(nonce == nonces[signatory]++, "CAKE::delegateBySig: invalid nonce");
+        require(now <= expiry, "CAKE::delegateBySig: signature expired");
+        return _delegate(signatory, delegatee);
+    }
+```
+address delegatee,uint nonce,uint expiry, uint8 v,bytes32 r, bytes32 s and hash the message and recover the address of who signed the message
+
+
+```solidity
+  function getCurrentVotes(address account)
+        external
+        view
+        returns (uint256)
+    {
+        uint32 nCheckpoints = numCheckpoints[account];
+        return nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
+    }
+```
+ Gets the current votes balance for account
+
+
+```solidity
+  function getPriorVotes(address account, uint blockNumber)
+        external
+        view
+        returns (uint256)
+    {
+        require(blockNumber < block.number, "CAKE::getPriorVotes: not yet determined");
+
+        uint32 nCheckpoints = numCheckpoints[account];
+        if (nCheckpoints == 0) {
+            return 0;
+        }
+
+        // First check most recent balance
+        if (checkpoints[account][nCheckpoints - 1].fromBlock <= blockNumber) {
+            return checkpoints[account][nCheckpoints - 1].votes;
+        }
+
+        // Next check implicit zero balance
+        if (checkpoints[account][0].fromBlock > blockNumber) {
+            return 0;
+        }
+
+        uint32 lower = 0;
+        uint32 upper = nCheckpoints - 1;
+        while (upper > lower) {
+            uint32 center = upper - (upper - lower) / 2; // ceil, avoiding overflow
+            Checkpoint memory cp = checkpoints[account][center];
+            if (cp.fromBlock == blockNumber) {
+                return cp.votes;
+            } else if (cp.fromBlock < blockNumber) {
+                lower = center;
+            } else {
+                upper = center - 1;
+            }
+        }
+        return checkpoints[account][lower].votes;
+    }
+
+```
+
+it gets all the votes of this account
+
+```solidity
+  function _delegate(address delegator, address delegatee)
+        internal
+    {
+        address currentDelegate = _delegates[delegator];
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying CAKEs (not scaled);
+        _delegates[delegator] = delegatee;
+
+        emit DelegateChanged(delegator, currentDelegate, delegatee);
+
+        _moveDelegates(currentDelegate, delegatee, delegatorBalance);
+    }
+```
+
+its changes delegate 
+
+
+
+```solidity
+  function _moveDelegates(address srcRep, address dstRep, uint256 amount) internal {
+        if (srcRep != dstRep && amount > 0) {
+            if (srcRep != address(0)) {
+                // decrease old representative
+                uint32 srcRepNum = numCheckpoints[srcRep];
+                uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
+                uint256 srcRepNew = srcRepOld.sub(amount);
+                _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
+            }
+
+            if (dstRep != address(0)) {
+                // increase new representative
+                uint32 dstRepNum = numCheckpoints[dstRep];
+                uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
+                uint256 dstRepNew = dstRepOld.add(amount);
+                _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
+            }
+        }
+    }
+```
+
+its moves delegates from an old delegatee to a new delegatee
+
+
+```solidity
+interface IMigratorChef {
+    function migrate(IBEP20 token) external returns (IBEP20);
+}
+```
+
+Perform LP token migration from legacy PancakeSwap to CakeSwap.
+
+```solidity
+interface IMigratorChef {
+    using SafeMath for uint256;
+    using SafeBEP20 for IBEP20;
+}
+```
+safeMath is a library that used for uint256
+
+SafeBEP20 is an interface that will be used to interact 
+
+```solidity
+struct UserInfo {
+    uint256 amount;    
+	uint256 rewardDebt;
+}
+```
+
+a struct that contains users amount and rewardDebt
