@@ -850,3 +850,16 @@ stores the interface 	IMigratorChef in a public variable called migrator
  PoolInfo[] public poolInfo
 ```	
 an array of structs called poolinfo
+
+```solidity
+ mapping (uint256 => mapping (address => UserInfo)) public userInfo;
+```	
+
+    // Total allocation points. Must be the sum of all allocation points in all pools.
+    uint256 public totalAllocPoint = 0;
+    // The block number when CAKE mining starts.
+    uint256 public startBlock;
+
+    event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
+    event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
+    event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
