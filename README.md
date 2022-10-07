@@ -803,3 +803,50 @@ struct UserInfo {
 ```
 
 a struct that contains users amount and rewardDebt
+
+```solidity
+struct PoolInfo {
+    IBEP20 lpToken;          
+    uint256 allocPoint;  
+    uint256 lastRewardBlock; 
+    uint256 accCakePerShare;
+}
+```
+
+this struct keeps the pool info, information about the lastrewardblock cakepershare
+
+```solidity
+CakeToken public cake;
+```
+stores CakeToken in a public variable called Cake
+
+```solidity
+SyrupBar public syrup;
+```
+stores SyrupBar in a public variable called syrup
+
+
+```solidity
+   address public devaddr;
+```
+stores the address of the person who deploys this contract
+
+```solidity
+ uint256 public cakePerBlock;
+```
+stores the amount of cake distributed per block
+
+```solidity
+uint256 public BONUS_MULTIPLIER = 1;
+```
+sets the bonus multiplier by one
+    
+```solidity
+IMigratorChef public migrator
+```	
+stores the interface 	IMigratorChef in a public variable called migrator
+  
+```solidity
+ PoolInfo[] public poolInfo
+```	
+an array of structs called poolinfo
